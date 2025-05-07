@@ -12,5 +12,6 @@
     public Guid OwnerId { get; set; } //the GUID of the Leafline user who owns this dispensary.
 
 
+
   }
 }

@@ -3,6 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using BCrypt.Net;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LeaflineApi.Controllers
 {
@@ -13,17 +18,24 @@ namespace LeaflineApi.Controllers
 
     private readonly ILogger<UserController> _logger;
     private readonly ApiContext _context;
+    private readonly IConfiguration _configuration;
 
-    public UserController(ILogger<UserController> logger, ApiContext context)
+    public UserController(ILogger<UserController> logger, ApiContext context, IConfiguration configuration)
     {
       _logger = logger;
       _context = context;
+      _configuration = configuration;
     }
 
     [HttpGet]
-    [Route("ListAll")]
-    public async Task<LeaflineResponse> GetUsers()
+    [Route("ListAll/{page}/{count}")]
+    [Authorize]
+    public async Task<LeaflineResponse> GetUsers(string query, int page, int count)
     {
+      
+      
+    
+
       LeaflineResponse result = new LeaflineResponse();
 
       try
@@ -43,6 +55,7 @@ namespace LeaflineApi.Controllers
 
     [HttpPost]
     [Route("Create")]
+    [Authorize]
     public async Task<LeaflineResponse> CreateUser(LeaflineUser user)
     {
 
@@ -88,18 +101,38 @@ namespace LeaflineApi.Controllers
 
     [HttpPost]
     [Route("Login")]
-    public async Task<LeaflineResponse> LoginUser(LeaflineUser user)
+    public async Task<LeaflineResponse> LoginUser(string email, string password)
     {
       LeaflineResponse result = new LeaflineResponse();
       try
       {
-        var existing = await _context.users.FirstOrDefaultAsync(x => x.Email == user.Email);
+        var existing = await _context.users.FirstOrDefaultAsync(x => x.Email == email);
         if (existing != null)
         {
-          if (BCrypt.Net.BCrypt.Verify(user.PasswordHash, existing.PasswordHash))
+          if (BCrypt.Net.BCrypt.Verify(password, existing.PasswordHash))
           {
             result.Message = "Login successful.";
-            result.Content = JsonSerializer.Serialize(existing);
+
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+              Subject = new ClaimsIdentity(new[]
+              {
+                new Claim(ClaimTypes.Name, existing.UserId.ToString())
+              }),
+              Expires = DateTime.UtcNow.AddHours(1),
+              Issuer = jwtSettings["Issuer"],
+              Audience = jwtSettings["Audience"],
+              SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+
+            result.Content = JsonSerializer.Serialize(tokenHandler.WriteToken(token));
             result.isSuccess = true;
           }
           else

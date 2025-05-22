@@ -17,4 +17,9 @@ Authorization: Bearer YOUR_API_KEY
 <br/>
 
 <h3>📘 Available Endpoints</h3>
-<h2>GET /dispensaries</h2>
+<h2>GET /Dispensaries</h2>
+<p>Provides a list of all dispensary unique identifiers within the Leafline API</p>
+<h2>GET /Dispensary/{id}</h2>
+<p>Returns the LeaflineDispensary object with the requested dispensary unique identifier.</p>
+<h2>POST /Dispensary/create</h2>
+<p>Accepts JSON serialized LeaflineDispensary objects to create a new database entry.</p>

@@ -13,6 +13,10 @@ namespace LeaflineApi
     public DbSet<LeaflineUser> users { get; set; }
     public DbSet<LeaflineDispensary> dispensaries { get; set; }
 
+    public DbSet<LeaflineTag> tags { get; set; }
+
+    public DbSet<LeaflineTagEntry> tagEntries { get; set; }
+
 
   }
 }

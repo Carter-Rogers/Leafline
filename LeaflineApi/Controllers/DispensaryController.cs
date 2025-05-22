@@ -52,6 +52,16 @@ namespace LeaflineApi.Controllers
     }
 
     [HttpPost]
+    [Route("/Dispensaries")]
+    public async Task<List<LeaflineDispensary>> GetDispensaries(LeaflineQuery query, int page, int count) 
+    {
+      var queryResult = await _context.dispensaries.Where(d => d.Name.Contains(query.Name) || d.DispensaryId.ToString() == query.UniqueId || d.OwnerId.ToString() == query.OwnerId).ToListAsync();
+      queryResult = queryResult.Skip(page * count).Take(count).ToList();
+      return queryResult;
+    }
+
+
+    [HttpPost]
     [Route("/Dispensary/create")]
     public async Task<LeaflineResponse> CreateDispensary(LeaflineDispensary dispensary)
     {

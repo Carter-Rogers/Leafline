@@ -1,4 +1,5 @@
 ﻿using LeaflineApi.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace LeaflineApi.Controllers
 
   [ApiController]
   [Route("Tags")]
+  [Authorize]
   public class TagController : ControllerBase
   {
 

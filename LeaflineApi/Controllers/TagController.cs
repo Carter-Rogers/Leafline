@@ -39,7 +39,9 @@ namespace LeaflineApi.Controllers
         var newTag = new LeaflineTag
         {
           TagId = Guid.NewGuid(),
-          Tag = tag
+          Tag = tag,
+          CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
+          ModifiedOn = DateOnly.FromDateTime(DateTime.UtcNow)
         };
 
         var result = await _context.tags.AddAsync(newTag);

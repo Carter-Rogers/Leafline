@@ -35,7 +35,8 @@ namespace LeaflineApi.Controllers
     {
       LeaflineResponse response = new LeaflineResponse();
       var existingTag = await _context.tags.FirstOrDefaultAsync(t => t.Tag.ToLower().Equals(tag));
-      if(existingTag == null) {
+      if (existingTag == null)
+      {
         var newTag = new LeaflineTag
         {
           TagId = Guid.NewGuid(),
@@ -50,12 +51,40 @@ namespace LeaflineApi.Controllers
         response.isSuccess = true;
         response.Message = "Tag created successfully!";
         response.Content = JsonSerializer.Serialize(result);
-      }else {
+      }
+      else
+      {
         response.isSuccess = false;
         response.Message = "Tag already exists!";
         response.Content = null;
       }
 
+
+      return response;
+    }
+
+    [HttpGet]
+    [Route("/Tags/GetTagEntries")]
+    public async Task<LeaflineResponse> GetTagEntries(string tag)
+    {
+      LeaflineResponse response = new LeaflineResponse();
+
+      var tagEntity = await _context.tags.FirstOrDefaultAsync(t => t.Tag.ToLower().Equals(tag.ToLower()));
+      if (tagEntity != null)
+      {
+        var tagEntries = await _context.tagEntries.Where(te => te.TagId == tagEntity.TagId).ToListAsync();
+
+        response.isSuccess = true;
+        response.Message = "Retrieved tag entries successfully!";
+        response.Content = JsonSerializer.Serialize(tagEntries);
+
+      }
+      else
+      {
+        response.isSuccess = false;
+        response.Message = "That tag doesn't exist!";
+        response.Content = null;
+      }
 
       return response;
     }
